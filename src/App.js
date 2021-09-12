@@ -11,27 +11,35 @@ const App = () => {
   const imageRef = useRef(null);
   const [diceMatrix, setDiceMatrix] = useState([]);
   const [numDice, setNumDice] = useState(1);
+  const [imageSource, setImageSource] = useState("seinfeld.jpg");
 
   const dice = ['⚅', '⚄', '⚃', '⚂', '⚁', '⚀']
 
   const updateImage = () => {
     const canvas = canvasRef.current;
-    const context = canvas.getContext && canvas.getContext('2d');
+    const context = canvas.getContext('2d');
+
     const image = imageRef.current;
     canvas.height = image.naturalHeight || image.offsetHeight || image.height;
     canvas.width = image.naturalWidth || image.offsetWidth || image.width;
 
+    console.log(`updating image ${canvas.width}x${canvas.height}`);
+    console.log(image);
+    //at this point, image isnt loaded in properly
     context.drawImage(image, 0, 0);
   }
 
   const drawDice = () => {
     const canvas = canvasRef.current;
-    const context = canvas.getContext && canvas.getContext('2d');
+    const context = canvas.getContext('2d');
     const height = canvas.height;
     const width = canvas.width;
 
     if (width === 0) {
+      console.log('no draw')
       return;
+    } else {
+      console.log('draw')
     }
 
     const pixelsPerDice = Math.floor(width / numDice);
@@ -63,10 +71,6 @@ const App = () => {
     return Math.floor(colourSum / count);
   }
 
-  const uploadImage = e => {
-    imageRef.current.src = URL.createObjectURL(e.target.files[0]);
-  }
-
   const numDiceValid = (width, numDice) => {
     const pixelsPerDice = Math.floor(width / numDice);
     const dicePerRow = Math.floor(width / pixelsPerDice);
@@ -95,10 +99,19 @@ const App = () => {
     setNumDice(tempNumDice);
   }
 
-  useEffect(() => {
+  const refresh = () => {
     updateImage();
     drawDice();
-  }, [imageRef.current, numDice])
+  }
+
+  useEffect(() => {
+    refresh();
+  }, [numDice])
+
+
+  const uploadImage = e => {
+    setImageSource(URL.createObjectURL(e.target.files[0]));
+  }
 
   const diceCount = diceMatrix.reduce((count, a) => count + a.length, 0);
 
@@ -110,7 +123,12 @@ const App = () => {
       <div className="input">
         <div>
           <label htmlFor="image">
-            <img alt="whatever you uploaded" ref={imageRef} height="100" src="seinfeld.jpg"/>
+            <img
+              alt="whatever you uploaded"
+              ref={imageRef}
+              height="100"
+              src={imageSource}
+              onLoad={()=>refresh()}/>
           </label>
           <input type="file"
             id="image"
@@ -136,12 +154,12 @@ const App = () => {
          </div>
         </div>
       </div>
-        <canvas ref={canvasRef}  style={{display:"none"}} />
-      </div>
-      <div className="dice-holder">
-      {  diceMatrix.map((row, i) => <div key={i}>{row}</div>) }
-      </div>
+      <canvas ref={canvasRef}  style={{display:"none"}} />
     </div>
+    <div className="dice-holder">
+    {  diceMatrix.map((row, i) => <div key={i}>{row}</div>) }
+    </div>
+  </div>
   );
 }
 
