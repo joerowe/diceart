@@ -17,16 +17,11 @@ const App = () => {
 
   const updateImage = () => {
     const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
     const image = imageRef.current;
     canvas.height = image.naturalHeight || image.offsetHeight || image.height;
     canvas.width = image.naturalWidth || image.offsetWidth || image.width;
 
-    console.log(`updating image ${canvas.width}x${canvas.height}`);
-    console.log(image);
-    //at this point, image isnt loaded in properly
-    context.drawImage(image, 0, 0);
+    canvas.getContext('2d').drawImage(image, 0, 0);
   }
 
   const drawDice = () => {
@@ -36,10 +31,7 @@ const App = () => {
     const width = canvas.width;
 
     if (width === 0) {
-      console.log('no draw')
       return;
-    } else {
-      console.log('draw')
     }
 
     const pixelsPerDice = Math.floor(width / numDice);
