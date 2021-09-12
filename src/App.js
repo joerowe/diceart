@@ -121,8 +121,14 @@ const App = () => {
         <div className="options">
           <div>
             <label htmlFor="numDice">Number of dice per row:</label>
-            <input type="number" id="numDice" value={numDice} onChange={(e) => updateDicePerRow(e.target.value)}
-             min="1" max="1000" />
+            <input
+              type="number"
+              id="numDice"
+              value={numDice}
+              onChange={(e) => updateDicePerRow(e.target.value)}
+              min="1"
+              max="1000"
+              style={{textAlign:"right"}} />
           </div>
          <div>
            <p>This image takes {diceCount} dice to create!</p>
