@@ -10,7 +10,7 @@ const App = () => {
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
   const [diceMatrix, setDiceMatrix] = useState([]);
-  const [numDice, setNumDice] = useState(50);
+  const [numDice, setNumDice] = useState(1);
 
   const dice = ['⚅', '⚄', '⚃', '⚂', '⚁', '⚀']
 
@@ -18,8 +18,8 @@ const App = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext && canvas.getContext('2d');
     const image = imageRef.current;
-    const height = canvas.height = image.naturalHeight || image.offsetHeight || image.height;
-    const width = canvas.width = image.naturalWidth || image.offsetWidth || image.width;
+    canvas.height = image.naturalHeight || image.offsetHeight || image.height;
+    canvas.width = image.naturalWidth || image.offsetWidth || image.width;
 
     context.drawImage(image, 0, 0);
   }
@@ -30,12 +30,11 @@ const App = () => {
     const height = canvas.height;
     const width = canvas.width;
 
-    const pixelsPerDice = Math.floor(width / numDice);
-    const dicePerRow = Math.floor(width / pixelsPerDice);
-    // 
-    // console.log(`${width} - ${pixelsPerDice} x ${dicePerRow} = ${pixelsPerDice*dicePerRow}`)
+    if (width === 0) {
+      return;
+    }
 
-    const currentDicePerRow = diceMatrix[0] ? diceMatrix[0].length : 0;
+    const pixelsPerDice = Math.floor(width / numDice);
 
     let tempDiceMatrix = []
     for (let y = 0; y < height; y += pixelsPerDice) {
@@ -68,27 +67,32 @@ const App = () => {
     imageRef.current.src = URL.createObjectURL(e.target.files[0]);
   }
 
+  const numDiceValid = (width, numDice) => {
+    const pixelsPerDice = Math.floor(width / numDice);
+    const dicePerRow = Math.floor(width / pixelsPerDice);
+    const totalPixelsCovered = pixelsPerDice * dicePerRow;
+
+    const fullImageCovered = totalPixelsCovered === width;
+    const diceEqualToTarget = dicePerRow === numDice;
+
+    return fullImageCovered && diceEqualToTarget;
+  }
+
   const updateDicePerRow = targetNumDice => {
 
     let tempNumDice = parseInt(targetNumDice);
+    const width = canvasRef.current.width;
+    const toAdd = tempNumDice > numDice ? 1 : -1;
 
-    const canvas = canvasRef.current;
-    const context = canvas.getContext && canvas.getContext('2d');
-    const width = canvas.width;
-
-    const pixelsPerDice = Math.ceil(width / tempNumDice);
-    const dicePerRow = Math.ceil(width / pixelsPerDice);
-
-    const currentDicePerRow = diceMatrix[0] ? diceMatrix[0].length : 0;
-    if (dicePerRow !== tempNumDice) {
-      if (tempNumDice > numDice) {
-        updateDicePerRow(tempNumDice + 1);
-      } else {
-        updateDicePerRow(tempNumDice - 1);
-      }
-    } else {
-      setNumDice(tempNumDice);
+    if (width === 0) {
+      return;
     }
+
+    while (!numDiceValid(width, tempNumDice)) {
+      tempNumDice += toAdd;
+    }
+
+    setNumDice(tempNumDice);
   }
 
   useEffect(() => {
@@ -100,25 +104,37 @@ const App = () => {
 
   return (
     <div className="App">
+      <div className="intro">
+        <p>Welcome to the dice art generator! Complete with price estimation in case you'd actually pay literally hundreds of pounds to put one of these monstrosities on your wall!</p>
+        <p>(Click the image to upload your own)</p>
       <div className="input">
-        <form>
-          <label htmlFor="image">Select image:</label>
+        <div>
+          <label htmlFor="image">
+            <img alt="whatever you uploaded" ref={imageRef} height="100" src="seinfeld.jpg"/>
+          </label>
           <input type="file"
             id="image"
             accept="image/jpeg, image/png"
             style={{display:"none"}}
             onChange={e => uploadImage(e)} />
-        </form>
-
-        <img alt="whatever you uploaded" ref={imageRef} height="100" src="seinfeld.jpg"/>
-          <label htmlFor="numDice">Number of dice per row:</label>
-          <input type="number" id="numDice" value={numDice} onChange={(e) => updateDicePerRow(e.target.value)}
-         min="10" max="500" />
+        </div>
+        <div className="options">
+          <div>
+            <label htmlFor="numDice">Number of dice per row:</label>
+            <input type="number" id="numDice" value={numDice} onChange={(e) => updateDicePerRow(e.target.value)}
+             min="1" max="1000" />
+          </div>
+         <div>
+           <p>This image takes {diceCount} dice to create!</p>
+           <p>At 10p per dice, it'll cost ya £{(diceCount*0.1).toFixed(2)}.</p>
+         </div>
+        </div>
+      </div>
         <canvas ref={canvasRef}  style={{display:"none"}} />
       </div>
+      <div className="dice-holder">
       {  diceMatrix.map((row, i) => <div key={i}>{row}</div>) }
-      <div>This image takes {diceCount} dice to create!</div>
-      <div>At 10p per dice, it'll cost ya £{(diceCount*0.1).toFixed(2)}.</div>
+      </div>
     </div>
   );
 }
