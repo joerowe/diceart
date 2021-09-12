@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/diceart/static/css/main.a8ad572f.chunk.css",
+    "main.js": "/diceart/static/js/main.ea89a701.chunk.js",
+    "main.js.map": "/diceart/static/js/main.ea89a701.chunk.js.map",
+    "runtime-main.js": "/diceart/static/js/runtime-main.8cdcd5fb.js",
+    "runtime-main.js.map": "/diceart/static/js/runtime-main.8cdcd5fb.js.map",
+    "static/js/2.b1323c21.chunk.js": "/diceart/static/js/2.b1323c21.chunk.js",
+    "static/js/2.b1323c21.chunk.js.map": "/diceart/static/js/2.b1323c21.chunk.js.map",
+    "static/js/3.c3377d16.chunk.js": "/diceart/static/js/3.c3377d16.chunk.js",
+    "static/js/3.c3377d16.chunk.js.map": "/diceart/static/js/3.c3377d16.chunk.js.map",
+    "index.html": "/diceart/index.html",
+    "static/css/main.a8ad572f.chunk.css.map": "/diceart/static/css/main.a8ad572f.chunk.css.map",
+    "static/js/2.b1323c21.chunk.js.LICENSE.txt": "/diceart/static/js/2.b1323c21.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.8cdcd5fb.js",
+    "static/js/2.b1323c21.chunk.js",
+    "static/css/main.a8ad572f.chunk.css",
+    "static/js/main.ea89a701.chunk.js"
+  ]
+}
