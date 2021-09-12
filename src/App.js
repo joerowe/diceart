@@ -10,7 +10,7 @@ const App = () => {
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
   const [diceMatrix, setDiceMatrix] = useState([]);
-  const [numDice, setNumDice] = useState(1);
+  const [numDice, setNumDice] = useState(2);
   const [imageSource, setImageSource] = useState("seinfeld.jpg");
 
   const dice = ['⚅', '⚄', '⚃', '⚂', '⚁', '⚀']
@@ -37,9 +37,9 @@ const App = () => {
     const pixelsPerDice = Math.floor(width / numDice);
 
     let tempDiceMatrix = []
-    for (let y = 0; y < height; y += pixelsPerDice) {
+    for (let y = 0; y <= height - pixelsPerDice; y += pixelsPerDice) {
       let diceMatrixRow = [];
-      for (let x = 0; x < width; x += pixelsPerDice) {
+      for (let x = 0; x <= width - pixelsPerDice; x += pixelsPerDice) {
         const data = context.getImageData(x, y, pixelsPerDice, pixelsPerDice).data;
         const averageRGB = getAverageRGB(data);
         const index = Math.floor(averageRGB / 43);
@@ -63,32 +63,36 @@ const App = () => {
     return Math.floor(colourSum / count);
   }
 
-  const numDiceValid = (width, numDice) => {
-    const pixelsPerDice = Math.floor(width / numDice);
-    const dicePerRow = Math.floor(width / pixelsPerDice);
-    const totalPixelsCovered = pixelsPerDice * dicePerRow;
-
-    const fullImageCovered = totalPixelsCovered === width;
-    const diceEqualToTarget = dicePerRow === numDice;
-
-    return fullImageCovered && diceEqualToTarget;
+  const dicePerRowEqualToTarget = (numDice, pixelsPerDice) => {
+    const dicePerRow = Math.floor(canvasRef.current.width / pixelsPerDice);
+    return dicePerRow === numDice;
   }
 
   const updateDicePerRow = targetNumDice => {
-
-    let tempNumDice = parseInt(targetNumDice);
-    const width = canvasRef.current.width;
+    let tempNumDice = targetNumDice ? parseInt(targetNumDice) : 1;
     const toAdd = tempNumDice > numDice ? 1 : -1;
 
-    if (width === 0) {
+    if (canvasRef.current.width === 0) {
       return;
     }
 
-    while (!numDiceValid(width, tempNumDice)) {
+    let pixelsPerDice = Math.floor(canvasRef.current.width / tempNumDice);
+    while (!dicePerRowEqualToTarget(tempNumDice, pixelsPerDice)) {
       tempNumDice += toAdd;
+      pixelsPerDice = pixelsPerDice = Math.floor(canvasRef.current.width / tempNumDice);
+    }
+
+    if (canvasRef.current.height < pixelsPerDice) {
+      tempNumDice += 1;
     }
 
     setNumDice(tempNumDice);
+  }
+
+  const handleImageChange = () => {
+    updateImage();
+    updateDicePerRow(1);
+    drawDice();
   }
 
   const refresh = () => {
@@ -105,6 +109,10 @@ const App = () => {
     setImageSource(URL.createObjectURL(e.target.files[0]));
   }
 
+  const formatNumber = num => {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+  }
+
   const diceCount = diceMatrix.reduce((count, a) => count + a.length, 0);
 
   return (
@@ -113,14 +121,14 @@ const App = () => {
         <p>Welcome to the dice art generator! Complete with price estimation in case you'd actually pay literally hundreds of pounds to put one of these monstrosities on your wall!</p>
         <p>(Click the image to upload your own)</p>
       <div className="input">
-        <div>
+        <div className="image">
           <label htmlFor="image">
             <img
               alt="whatever you uploaded"
               ref={imageRef}
               height="100"
               src={imageSource}
-              onLoad={()=>refresh()}/>
+              onLoad={()=>handleImageChange()}/>
           </label>
           <input type="file"
             id="image"
@@ -141,8 +149,11 @@ const App = () => {
               style={{textAlign:"right"}} />
           </div>
          <div>
-           <p>This image takes {diceCount} dice to create!</p>
-           <p>At 10p per dice, it'll cost ya £{(diceCount*0.1).toFixed(2)}.</p>
+           {diceMatrix[0] &&
+             <div>
+           <p>This image has {diceMatrix.length} rows of {diceMatrix[0].length} dice.</p>
+           <p>That's a total of {formatNumber(diceCount)} dice!</p>
+           <p>At 10p per dice, it'll cost ya £{formatNumber((diceCount*0.1).toFixed(2))}.</p></div>}
          </div>
         </div>
       </div>
